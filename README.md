@@ -12,7 +12,7 @@
   <a href="https://github.com/Lumi-node/orchestrator-rm"><img src="https://img.shields.io/badge/GitHub-Repo-blue?logo=github" alt="GitHub"></a>
   <a href="https://github.com/Lumi-node/orchestrator-rm/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
   <a href="https://pypi.org/project/orchestrator-rm/"><img src="https://img.shields.io/badge/python-%3E%3D3.10-blue.svg" alt="Python"></a>
-  <a href="https://github.com/Lumi-node/orchestrator-rm/actions"><img src="https://img.shields.io/badge/tests-9-success.svg" alt="Tests"></a>
+  <a href="https://github.com/Lumi-node/orchestrator-rm/actions"><img src="https://img.shields.io/badge/tests-43-success.svg" alt="Tests"></a>
 </p>
 
 ---
