@@ -1,0 +1,14 @@
+Build complete. Here's what was implemented:
+
+**9 modules** in `src/orchestrator_rm/`:
+- **cost_metric** — scalar efficiency cost (token_weight × tokens + call_penalty × calls)
+- **trace_collector** — runs queries through mock multi-agent pipelines, logs events
+- **data_utils** — synthetic arithmetic puzzles with 5 deterministic agents and 4 strategy tiers (efficient → wasteful)
+- **pair_generator** — clusters traces by outcome, pairs within clusters, assigns winner by cost
+- **encoder** — `torch.nn.TransformerEncoder` mapping event sequences to fixed-size vectors with positional encoding, event-type/agent embeddings, and numeric features
+- **reward_model** — wraps encoder + MLP head; trains with Bradley-Terry loss `-log(σ(s_w - s_l))`; provides `score`/`fit`/`save`/`load`
+- **orchestrator** — MLP policy selecting next sub-agent from partial trace features; REINFORCE training with reward model as critic
+- **trainer** — coordinates the full pipeline: traces → pairs → reward model → policy
+- **eval** — pairwise ranking test asserting efficient > inefficient after training
+
+**43 tests pass**, including the core acceptance test: the trained model correctly ranks a 1-agent efficient trace above a 5-agent wasteful trace that produces the same outcome.

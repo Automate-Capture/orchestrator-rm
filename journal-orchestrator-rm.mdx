@@ -1,0 +1,25 @@
+---
+title: "OrchestrateRM: Reward Modeling for Multi-Agent Orchestration"
+abstract: "Self‑supervised Bradley‑Terry reward model for multi‑agent orchestration"
+authors:
+  - name: "Andrew Young"
+    affiliation: "Automate Capture Research"
+publishedDate: 2026-06-13
+tags:
+  - Reward Modeling
+  - Multi-Agent Systems
+  - Orchestration
+  - Reinforcement Learning
+  - Cooperative AI
+status: published
+featured: false
+pdfUrl: "https://research.automate-capture.com/papers/RR-orchestrator-rm-Young2026.pdf"
+---
+
+Over the past few weeks I have been developing a self‑supervised reward model for coordinating multiple agents, and the result is now packaged as **orchestrator_rm**. The core motivation behind the project was the observation that many multi‑agent systems rely on handcrafted heuristics to assess the quality of joint behavior, which often limits scalability and adaptability. By framing orchestration quality as a pairwise preference problem and learning a Bradley‑Terry model from the agents’ own interactions, we can let the system discover what constitutes “good” coordination without external supervision. This approach promises a more principled way to guide policy learning, especially in settings where the agents must negotiate limited resources or synchronize actions over long horizons.
+
+The implementation follows a straightforward pipeline. First, agents generate trajectories in a shared environment, and from each trajectory we extract a set of candidate snippets. The model then constructs pairwise comparisons by asking a language model to rank these snippets according to a prompt that emphasizes coordination, efficiency, and safety. The resulting preference data feed a Bradley‑Terry likelihood, which we optimize using stochastic gradient descent. The learned parameters are a set of scalar scores that can be interpreted as latent “quality” values for any candidate snippet; these scores are then used as a reward signal for downstream reinforcement‑learning updates. The package ships with a clean API: `orchestrator_rm.fit` handles data ingestion and model training, while `orchestrator_rm.evaluate` returns calibrated scores for new snippets. Supporting utilities for data preprocessing, prompt generation, and result logging are included, and a full test suite ensures reproducibility across Python versions.
+
+Working through the project revealed several practical insights. The pairwise preference generation step proved to be the most fragile component; small variations in prompt phrasing caused noticeable shifts in the inferred rankings, suggesting that the language model’s implicit bias can dominate the signal if not carefully controlled. Moreover, the Bradley‑Terry formulation, while elegant, assumes independence among comparisons—a condition that is only approximately satisfied when snippets share overlapping content. To mitigate this, I introduced a simple regularization term that penalizes overly confident scores, which improved stability but also highlighted the trade‑off between expressiveness and robustness. Performance-wise, the model scales linearly with the number of comparisons, so for large fleets of agents we will need to explore more efficient sampling strategies or hierarchical extensions.
+
+Looking ahead, the reward model opens several avenues for deeper investigation. Integrating the learned scores directly into a multi‑agent reinforcement‑learning loop could enable agents to co‑adapt their policies in real time, potentially reducing the need for separate evaluation phases. Extending the Bradley‑Terry framework to handle multi‑way comparisons or to incorporate contextual features (e.g., agent identities or environmental states) would make the model more expressive and better suited to heterogeneous teams. Finally, situating this work within the broader landscape of preference‑based reinforcement learning underscores its relevance: by leveraging self‑supervised preferences, we can sidestep the costly collection of human annotations while still grounding learning in meaningful notions of coordination. The **orchestrator_rm** package therefore serves as both a concrete tool for immediate experimentation and a stepping stone toward more autonomous, preference‑driven multi‑agent systems.
