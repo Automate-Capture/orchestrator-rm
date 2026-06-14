@@ -1,62 +1,34 @@
 # OrchestrateRM
 
-## Self‑supervised Bradley‑Terry Reward Model for Multi‑Agent Orchestration
+**Self‑supervised Bradley–Terry reward model for multi‑agent orchestration.**
 
-<div align="center">
-  <h1>OrchestrateRM</h1>
-  <p><em>Learn to rank and improve orchestration quality without any human labels.</em></p>
-  <a href="https://github.com/your-org/orchestrator_rm" target="_blank">
-    <img src="https://img.shields.io/github/stars/your-org/orchestrator_rm?style=flat-square" alt="GitHub stars">
-  </a>
-  <a href="https://pypi.org/project/orchestrator_rm/" target="_blank">
-    <img src="https://img.shields.io/pypi/v/orchestrator_rm?style=flat-square" alt="PyPI version">
-  </a>
-</div>
+OrchestrateRM learns a quality signal for multi‑agent orchestration from the agents' own execution traces — no human labels. It generates pairwise preferences from synthetic traces, fits a Bradley–Terry reward model over a lightweight transformer encoder, and exposes that reward for ranking traces or shaping orchestration policies.
 
----  
+## Quick Start
 
-## ✨ Features
+```python
+import torch
+from orchestrator_rm.cost_metric import CostMetric
+from orchestrator_rm.data_utils import SyntheticDataset
+from orchestrator_rm.pair_generator import PairGenerator
+from orchestrator_rm.reward_model import OrchestratorRewardModel
+from orchestrator_rm.eval import Evaluator
 
-| | | |
-|---|---|---|
-| :rocket: **Self‑Supervised** | Train a Bradley‑Terry reward model directly from agent interactions, no human annotations required. |
-| :gear: **Modular Orchestration** | Plug‑and‑play components for agents, environments, and evaluators; works with any RL or LLM backend. |
-| :chart_with_upwards_trend: **Quality Ranking** | Convert pairwise preferences into a scalar reward that reflects true orchestration performance. |
-| :lock: **Robust & Scalable** | Efficient Cython/Numba implementation; supports distributed training on CPUs or GPUs. |
+# 1. Build a synthetic dataset of orchestration traces
+dataset = SyntheticDataset(seed=42)
+traces = dataset.make_dataset(num_queries=16, traces_per_query=4)
 
----  
+# 2. Turn traces into preference pairs (cheaper trace preferred)
+pairs = PairGenerator(CostMetric()).generate_pairs(traces)
 
-## 📦 Quick Install
+# 3. Fit the Bradley–Terry reward model
+model = OrchestratorRewardModel(d_model=16, nhead=4, num_layers=1)
+model.fit(pairs, epochs=12, lr=1e-3)
 
-```bash
-pip install orchestrator_rm
+# 4. Score: the model should rank the efficient trace above the inefficient one
+efficient, inefficient = dataset.make_contrastive_pair()
+result = Evaluator(model).evaluate_pairwise(efficient, inefficient)
+print(result)   # {'winner': 'a', 'score_a': ..., 'score_b': ..., 'margin': ...}
 ```
 
----  
-
-## 🚀 Getting Started
-
-[Start the tutorial →](getting_started.md)
-
----  
-
-## 📚 Documentation
-
-- **API Reference** – Detailed docs for each module (`orchestrator_rm.<module>`).  
-- **Examples** – End‑to‑end notebooks showing how to train, evaluate, and deploy the reward model.  
-- **Contributing** – Guidelines for adding new agents, environments, or custom loss functions.
-
----  
-
-## 🙌 Community
-
-- **Discussions** – Join the conversation on GitHub Discussions.  
-- **Issues** – Report bugs or request features.  
-- **Slack** – Connect with other developers in the `#orchestrator-rm` channel.  
-
----  
-
-<div align="center">
-  <a href="https://github.com/your-org/orchestrator_rm" class="md-button md-button--primary">GitHub Repository</a>
-  <a href="https://pypi.org/project/orchestrator_rm/" class="md-button">PyPI Package</a>
-</div>
+See [Installation](getting-started/installation.md) and the [Quick Start guide](getting-started/quick-start.md) to go further, or the [API Reference](reference.md).

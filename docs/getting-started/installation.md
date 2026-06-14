@@ -1,20 +1,20 @@
 # Installation
 
-## From PyPI
+Install the latest version directly from GitHub:
 
 ```bash
-pip install orchestrator-rm
+pip install git+https://github.com/Lumi-node/orchestrator-rm.git
 ```
 
-## From Source
+Requires Python ≥ 3.10.
+
+### Development install
 
 ```bash
 git clone https://github.com/Lumi-node/orchestrator-rm.git
 cd orchestrator-rm
 pip install -e ".[dev]"
+pytest -q
 ```
 
-## Requirements
-
-- Python >= 3.10
-- Dependencies: , orchestrator_rm, random, torch
+> Not published to PyPI — install from source as shown above.
