@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#orchestraterm-architecture-overview" class="md-skip">
+        <a href="#architecture" class="md-skip">
           Skip to content
         </a>
       
@@ -596,43 +596,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-system-overview" class="md-nav__link">
+  <a href="#modules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. System Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-module-dependency-diagram" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Module Dependency Diagram
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-modulebymodule-description" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Module‑by‑Module Description
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-data-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Data Flow
+        Modules
       
     </span>
   </a>
@@ -755,43 +722,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-system-overview" class="md-nav__link">
+  <a href="#modules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. System Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-module-dependency-diagram" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Module Dependency Diagram
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-modulebymodule-description" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. Module‑by‑Module Description
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-data-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Data Flow
+        Modules
       
     </span>
   </a>
@@ -818,141 +752,63 @@
   
 
 
-<h1 id="orchestraterm-architecture-overview">OrchestrateRM – Architecture Overview<a class="headerlink" href="#orchestraterm-architecture-overview" title="Permanent link">&para;</a></h1>
-<p><strong>Package name:</strong> <code>orchestrator_rm</code><br />
-All public symbols are imported as <code>orchestrator_rm.&lt;module&gt;</code>. The package implements a self‑supervised Bradley‑Terry reward model that learns to rank orchestration traces, together with the surrounding infrastructure for data collection, encoding, pair generation, training and evaluation.</p>
-<hr />
-<h2 id="1-system-overview">1. System Overview<a class="headerlink" href="#1-system-overview" title="Permanent link">&para;</a></h2>
-<p>OrchestrateRM treats the problem of multi‑agent orchestration as a sequence‑to‑sequence decision process.<br />
-1. <strong>Trace collection</strong> gathers execution traces from a set of heterogeneous agents (handlers).<br />
-2. <strong>Encoding</strong> turns each trace into a dense vector using a positional‑encoding‑augmented transformer‑style encoder.<br />
-3. <strong>Pair generation</strong> builds contrastive (A, B) pairs of traces for the same query.<br />
-4. <strong>Reward model</strong> (Bradley‑Terry) learns a scalar quality score for any trace; the model is trained by maximizing the likelihood of the observed pairwise preferences.<br />
-5. <strong>Orchestrator</strong> uses the learned reward model to perform policy‑gradient updates, selecting agents that are expected to improve the reward.<br />
-6. <strong>Evaluation</strong> runs held‑out queries, computes pairwise win probabilities, and reports an acceptance test flag.</p>
-<p>All components are loosely coupled through well‑defined Python interfaces, making the system easy to extend (new agents, alternative encoders, different cost metrics, etc.).</p>
-<hr />
-<h2 id="2-module-dependency-diagram">2. Module Dependency Diagram<a class="headerlink" href="#2-module-dependency-diagram" title="Permanent link">&para;</a></h2>
-<pre class="mermaid"><code>graph TD
-    %% Core modules
-    A[orchestrator_rm.orchestrator.Orchestrator] --&gt;|uses| B[orchestrator_rm.reward_model.OrchestratorRewardModel]
-    A --&gt;|encodes via| C[orchestrator_rm.encoder.TraceEncoder]
-    A --&gt;|collects traces via| D[orchestrator_rm.trace_collector.TraceCollector]
-    A --&gt;|optimises with| E[orchestrator_rm.trainer.train]
-
-    %% Data utilities
-    F[orchestrator_rm.data_utils] --&gt;|creates| G[orchestrator_rm.pair_generator.generate_pairs]
-    F --&gt;|provides| D
-    F --&gt;|exposes| H[orchestrator_rm.cost_metric.cost]
-
-    %% Encoder details
-    C --&gt;|positional encoding| I[orchestrator_rm.encoder.PositionalEncoding]
-
-    %% Reward model internals
-    B --&gt;|scores| C
-    B --&gt;|fits| J[orchestrator_rm.reward_model.fit]
-    B --&gt;|saves/loads| K[orchestrator_rm.reward_model.save/load]
-
-    %% Evaluation
-    L[orchestrator_rm.eval.evaluate_pairwise] --&gt;|calls| B
-    L --&gt;|calls| C
-    M[orchestrator_rm.eval.run_acceptance_test] --&gt;|uses| L
-
-    %% Pair generation
-    G --&gt;|takes| C
-    G --&gt;|outputs| N[Tuple[trace_a, trace_b]]
-
-    %% Trainer
-    E --&gt;|updates| B
-    E --&gt;|updates| A
-    E --&gt;|samples| F
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#bfb,stroke:#333,stroke-width:2px
-    style D fill:#ffb,stroke:#333,stroke-width:2px
-    style E fill:#fdd,stroke:#333,stroke-width:2px
-    style F fill:#ddd,stroke:#333,stroke-width:2px
-    style G fill:#cdd,stroke:#333,stroke-width:2px
-    style H fill:#c9c,stroke:#333,stroke-width:2px
-    style I fill:#9cf,stroke:#333,stroke-width:2px
-    style J fill:#9f9,stroke:#333,stroke-width:2px
-    style K fill:#9f9,stroke:#333,stroke-width:2px
-    style L fill:#fcc,stroke:#333,stroke-width:2px
-    style M fill:#fcc,stroke:#333,stroke-width:2px
-    style N fill:#eef,stroke:#333,stroke-width:2px</code></pre>
-<p><em>Arrows indicate the direction of usage (caller → callee).</em>  </p>
-<hr />
-<h2 id="3-modulebymodule-description">3. Module‑by‑Module Description<a class="headerlink" href="#3-modulebymodule-description" title="Permanent link">&para;</a></h2>
+<h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
+<p>OrchestrateRM is organized around a small set of modules that form a pipeline:</p>
+<pre class="mermaid"><code>flowchart LR
+    A["Synthetic traces"]
+    B["Pair generation"]
+    C["Reward model"]
+    D["Evaluation"]
+    A --&gt; B
+    B --&gt; C
+    C --&gt; D</code></pre>
+<h2 id="modules">Modules<a class="headerlink" href="#modules" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Module</th>
-<th>Primary Classes / Functions</th>
-<th>Role</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong><code>src/orchestrator_rm/__init__.py</code></strong></td>
-<td>–</td>
-<td>Exposes the public API (<code>Orchestrator</code>, <code>OrchestratorRewardModel</code>, utility functions) and defines the package version.</td>
+<td><code>cost_metric</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/cost_metric.py</code></strong></td>
-<td><code>cost(trace: dict) -&gt; float</code></td>
-<td>Computes a scalar “cost” (e.g., latency, resource usage) from a raw trace. The cost is added to the Bradley‑Terry score to bias the reward toward efficient executions.</td>
+<td><code>data_utils</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/data_utils.py</code></strong></td>
-<td><code>handler(query, ctx)</code>, <code>queries()</code>, <code>collector()</code>, <code>agent_names()</code>, <code>make_dataset()</code>, <code>make_contrastive_pair()</code></td>
-<td>Helper utilities for: <br>• Defining simple mock agents (<code>handler</code>). <br>• Enumerating a fixed set of test queries. <br>• Instantiating a <code>TraceCollector</code>. <br>• Building a synthetic dataset of traces. <br>• Sampling a single contrastive pair for quick sanity checks.</td>
+<td><code>encoder</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/encoder.py</code></strong></td>
-<td><code>PositionalEncoding(nn.Module)</code>, <code>TraceEncoder(nn.Module)</code> (methods: <code>get_agent_id</code>, <code>tokenize_trace</code>, <code>encode</code>, <code>encode_batch</code>)</td>
-<td>Turns a JSON‑like trace into a sequence of token IDs, adds sinusoidal positional encodings, and runs a small transformer encoder to produce a fixed‑size vector representation.</td>
+<td><code>eval</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/eval.py</code></strong></td>
-<td><code>evaluate_pairwise(trace_a, trace_b) -&gt; dict</code>, <code>run_acceptance_test() -&gt; bool</code></td>
-<td>Provides a high‑level evaluation API. <code>evaluate_pairwise</code> returns win probabilities and predicted scores; <code>run_acceptance_test</code> runs a small suite of held‑out queries and returns <code>True</code> if the model meets a predefined accuracy threshold.</td>
+<td><code>orchestrator</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/orchestrator.py</code></strong></td>
-<td><code>Orchestrator(nn.Module)</code> (methods: <code>forward</code>, <code>select_agent</code>, <code>run</code>, <code>policy_gradient_step</code>)</td>
-<td>The learning agent that decides which next sub‑agent to invoke given a partial trace. It queries the <code>TraceEncoder</code> for a representation, scores candidates with the reward model, and updates its policy via REINFORCE‑style gradients.</td>
+<td><code>pair_generator</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/pair_generator.py</code></strong></td>
-<td><code>generate_pairs(traces: List[dict]) -&gt; List[Tuple[dict, dict]]</code></td>
-<td>Given a collection of traces for the same query, produces all ordered pairs (A, B) where A ≠ B. These pairs are the training signal for the Bradley‑Terry model.</td>
+<td><code>reward_model</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/reward_model.py</code></strong></td>
-<td><code>OrchestratorRewardModel(nn.Module)</code> (methods: <code>forward</code>, <code>score</code>, <code>fit</code>, <code>save</code>, <code>load</code>)</td>
-<td>Implements the Bradley‑Terry likelihood: for a pair (i, j) the probability that i is preferred is <code>σ(s_i - s_j)</code>. <code>fit</code> runs a few epochs of stochastic gradient descent on the generated pairs. Persistence utilities (<code>save</code>/<code>load</code>) store the model state.</td>
+<td><code>trace_collector</code></td>
+<td>—</td>
 </tr>
 <tr>
-<td><strong><code>src/orchestrator_rm/trace_collector.py</code></strong></td>
-<td><code>TraceCollector</code> (methods: <code>register_agent</code>, <code>agent_names</code>, <code>collect</code>, <code>step</code>)</td>
-<td>Central hub that runs agents on a query, records their outputs, and builds a full execution trace (a list of <code>(agent, action, observation)</code> entries). <code>collect</code> runs a full orchestration run; <code>step</code> advances a partial trace by invoking a single agent.</td>
-</tr>
-<tr>
-<td><strong><code>src/orchestrator_rm/trainer.py</code></strong></td>
-<td><code>train(...)</code></td>
-<td>Orchestrates the end‑to‑end training loop: <br>1. Build a dataset (<code>make_dataset</code>). <br>2. Encode traces. <br>3. Generate contrastive pairs. <br>4. Fit the reward model. <br>5. Update the orchestrator policy. <br>6. Periodically evaluate and checkpoint.</td>
+<td><code>trainer</code></td>
+<td>—</td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="4-data-flow">4. Data Flow<a class="headerlink" href="#4-data-flow" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Query Generation</strong> – <code>data_utils.queries()</code> yields a string query.  </li>
-<li><strong>Trace Collection</strong> – <code>TraceCollector.collect(query, strategy)</code> runs each registered agent (registered via <code>register_agent</code>) according to a <em>strategy</em> (list of agent names). Each step returns a dictionary describing the action and observation; the concatenated steps form a <strong>trace</strong> (<code>dict</code>).  </li>
-<li><strong>Cost Augmentation</strong> – <code>cost_metric.cost(trace)</code> computes a numeric cost; the cost is stored inside the trace dict (e.g., <code>trace["cost"]</code>).  </li>
-<li><strong>Encoding</strong> – <code>TraceEncoder.encode(trace)</code> → <code>torch.Tensor</code> representation. Internally: <br>• <code>tokenize_trace</code> maps agent</li>
-</ol>
 
 
 
