@@ -1,10 +1,10 @@
 site_name: OrchestrateRM
-site_url: https://lumi-node.github.io/orchestrator-rm/
+site_url: https://automate-capture.github.io/orchestrator-rm/
 site_description: "Self‑supervised Bradley‑Terry reward model for multi‑agent orchestration"
 site_author: Andrew Young
-repo_url: https://github.com/Lumi-node/orchestrator-rm
-repo_name: Lumi-node/orchestrator-rm
-edit_uri: edit/main/docs/
+repo_url: https://github.com/Automate-Capture/orchestrator-rm
+repo_name: Automate-Capture/orchestrator-rm
+edit_uri: edit/master/docs/
 
 theme:
   name: material
@@ -62,7 +62,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Lumi-node/orchestrator-rm
+      link: https://github.com/Automate-Capture/orchestrator-rm
   generator: false
 
 extra_css:

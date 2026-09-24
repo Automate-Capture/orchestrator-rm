@@ -5,7 +5,7 @@ Thank you for your interest in contributing to OrchestrateRM!
 ## Development Setup
 
 ```bash
-git clone https://github.com/Lumi-node/orchestrator-rm.git
+git clone https://github.com/Automate-Capture/orchestrator-rm.git
 cd orchestrator-rm
 pip install -e ".[dev]"
 ```

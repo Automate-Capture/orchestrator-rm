@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please open a [private security advisory](https://github.com/Lumi-node/orchestrator-rm/security/advisories/new)
+Please open a [private security advisory](https://github.com/Automate-Capture/orchestrator-rm/security/advisories/new)
 rather than a public issue, and allow a reasonable window before disclosure.
 
 ## Supported versions

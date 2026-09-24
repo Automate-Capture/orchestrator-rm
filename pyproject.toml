@@ -39,10 +39,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Lumi-node/orchestrator-rm"
-Documentation = "https://lumi-node.github.io/orchestrator-rm/"
-Repository = "https://github.com/Lumi-node/orchestrator-rm"
-Issues = "https://github.com/Lumi-node/orchestrator-rm/issues"
+Homepage = "https://github.com/Automate-Capture/orchestrator-rm"
+Documentation = "https://automate-capture.github.io/orchestrator-rm/"
+Repository = "https://github.com/Automate-Capture/orchestrator-rm"
+Issues = "https://github.com/Automate-Capture/orchestrator-rm/issues"
 
 [tool.ruff]
 line-length = 100
